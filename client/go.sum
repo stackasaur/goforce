@@ -10,3 +10,5 @@ github.com/stackasaur/goforce/auth v0.0.2 h1:ZmOmcCP7b0F0kW/sL2x7koUnAuiRveCv7Av
 github.com/stackasaur/goforce/auth v0.0.2/go.mod h1:79z+j0bNkq15VTMhOw+uwjcukB8tFnhjsaChVAUcP3Y=
 github.com/stackasaur/goforce/auth v0.0.3 h1:Rbl0plD4lDO5Iuus7581u3PkxlcalRkhrvdQROst4iI=
 github.com/stackasaur/goforce/auth v0.0.3/go.mod h1:79z+j0bNkq15VTMhOw+uwjcukB8tFnhjsaChVAUcP3Y=
+github.com/stackasaur/goforce/auth v0.0.4 h1:yPm+FriEda33zN9O3Rf6VPmNzWnDBw+iU5u2bOXYEoE=
+github.com/stackasaur/goforce/auth v0.0.4/go.mod h1:79z+j0bNkq15VTMhOw+uwjcukB8tFnhjsaChVAUcP3Y=
