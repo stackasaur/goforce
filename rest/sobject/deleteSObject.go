@@ -3,6 +3,7 @@ package sobject
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -16,10 +17,10 @@ type DeleteSObjectRequest struct {
 	IfUnmodifiedSince time.Time
 }
 
-func (req DeleteSObjectRequest) GetMethod() string {
-	return http.MethodDelete
+func (req DeleteSObjectRequest) GetMethod() (string, error) {
+	return http.MethodDelete, nil
 }
-func (req DeleteSObjectRequest) GetHeaders() map[string]string {
+func (req DeleteSObjectRequest) GetHeaders() (map[string]string, error) {
 	headers := map[string]string{}
 
 	if len(req.IfMatch) > 0 {
@@ -38,24 +39,27 @@ func (req DeleteSObjectRequest) GetHeaders() map[string]string {
 			time.RFC1123,
 		)
 	}
-	return headers
+	return headers, nil
 }
 func (req DeleteSObjectRequest) GetPath(
 	version string,
-) string {
+) (*url.URL, error) {
 	v := req.Version
 	if len(v) == 0 {
 		v = version
 	}
 
-	ret := fmt.Sprintf(
+	ret, err := url.Parse(fmt.Sprintf(
 		"/services/data/v%s/sobjects/%s/%s/",
 		v,
 		req.SObjectApiName,
 		req.RecordId,
-	)
+	))
+	if err != nil {
+		return nil, err
+	}
 
-	return ret
+	return ret, nil
 }
 func (req DeleteSObjectRequest) GetBody() ([]byte, error) {
 	return nil, nil

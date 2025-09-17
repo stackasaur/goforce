@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
+	"net/url"
 )
 
 type BlobCreateRequest struct {
@@ -16,30 +17,33 @@ type BlobCreateRequest struct {
 	BinaryPartName string
 	BinaryData     []byte
 	FieldsPartName string
-	Fields         interface{}
+	Fields         any
 	FileName       string
 }
 
-func (req BlobCreateRequest) GetMethod() string {
-	return http.MethodPost
+func (req BlobCreateRequest) GetMethod() (string, error) {
+	return http.MethodPost, nil
 }
-func (req BlobCreateRequest) GetHeaders() map[string]string {
-	return nil
+func (req BlobCreateRequest) GetHeaders() (map[string]string, error) {
+	return nil, nil
 }
 func (req BlobCreateRequest) GetPath(
 	version string,
-) string {
+) (*url.URL, error) {
 	v := req.Version
 	if len(v) == 0 {
 		v = version
 	}
-	ret := fmt.Sprintf(
+	ret, err := url.Parse(fmt.Sprintf(
 		"/services/data/v%s/sobjects/%s",
 		v,
 		req.SObjectApiName,
-	)
+	))
+	if err != nil {
+		return nil, err
+	}
 
-	return ret
+	return ret, nil
 }
 func (req BlobCreateRequest) GetBody() ([]byte, error) {
 	fieldData, jsonErr := json.Marshal(req.Fields)

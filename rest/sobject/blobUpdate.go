@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
+	"net/url"
 )
 
 type BlobUpdateRequest struct {
@@ -17,31 +18,34 @@ type BlobUpdateRequest struct {
 	BinaryPartName string
 	BinaryData     []byte
 	FieldsPartName string
-	Fields         interface{}
+	Fields         any
 	FileName       string
 }
 
-func (req BlobUpdateRequest) GetMethod() string {
-	return http.MethodPatch
+func (req BlobUpdateRequest) GetMethod() (string, error) {
+	return http.MethodPatch, nil
 }
-func (req BlobUpdateRequest) GetHeaders() map[string]string {
-	return nil
+func (req BlobUpdateRequest) GetHeaders() (map[string]string, error) {
+	return nil, nil
 }
 func (req BlobUpdateRequest) GetPath(
 	version string,
-) string {
+) (*url.URL, error) {
 	v := req.Version
 	if len(v) == 0 {
 		v = version
 	}
-	ret := fmt.Sprintf(
+	ret, err := url.Parse(fmt.Sprintf(
 		"/services/data/v%s/sobjects/%s/%s",
 		v,
 		req.SObjectApiName,
 		req.RecordId,
-	)
+	))
+	if err != nil {
+		return nil, err
+	}
 
-	return ret
+	return ret, nil
 }
 func (req BlobUpdateRequest) GetBody() ([]byte, error) {
 	fieldData, jsonErr := json.Marshal(req.Fields)

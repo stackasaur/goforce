@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 )
 
 type SfdcRequest interface {
@@ -12,14 +13,14 @@ type SfdcRequest interface {
 	GetHeaders() (map[string]string, error)
 	GetPath(
 		string,
-	) (string, error)
+	) (*url.URL, error)
 	GetBody() ([]byte, error)
 }
 
 type GenericRequest struct {
 	Headers map[string]string
 	Method  string
-	Path    string
+	Path    *url.URL
 	Body    []byte
 }
 
@@ -31,7 +32,7 @@ func (req GenericRequest) GetHeaders() (map[string]string, error) {
 }
 func (req GenericRequest) GetPath(
 	_ string,
-) (string, error) {
+) (*url.URL, error) {
 	return req.Path, nil
 }
 func (req GenericRequest) GetBody() ([]byte, error) {
@@ -54,6 +55,7 @@ type SubRequestable interface {
 // this is used internally by the sfdc client when send it invoked.
 func SfdcRequestAsHttpRequest(
 	sfdcReq SfdcRequest,
+	baseUrl *url.URL,
 	version string,
 ) (*http.Request, error) {
 	bodyBytes, err := sfdcReq.GetBody()
@@ -92,9 +94,11 @@ func SfdcRequestAsHttpRequest(
 			err,
 		)
 	}
+
+	endpoint := baseUrl.ResolveReference(path)
 	ret, err := http.NewRequest(
 		method,
-		path,
+		endpoint.String(),
 		bytes.NewReader(
 			bodyBytes,
 		),

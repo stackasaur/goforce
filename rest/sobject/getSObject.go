@@ -3,6 +3,7 @@ package sobject
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -17,10 +18,10 @@ type GetSObjectRequest struct {
 	IfUnmodifiedSince time.Time
 }
 
-func (req GetSObjectRequest) GetMethod() string {
-	return http.MethodGet
+func (req GetSObjectRequest) GetMethod() (string, error) {
+	return http.MethodGet, nil
 }
-func (req GetSObjectRequest) GetHeaders() map[string]string {
+func (req GetSObjectRequest) GetHeaders() (map[string]string, error) {
 	headers := map[string]string{}
 
 	if len(req.IfMatch) > 0 {
@@ -39,30 +40,34 @@ func (req GetSObjectRequest) GetHeaders() map[string]string {
 			time.RFC1123,
 		)
 	}
-	return headers
+	return headers, nil
 }
 func (req GetSObjectRequest) GetPath(
 	version string,
-) string {
+) (*url.URL, error) {
 	v := req.Version
 	if len(v) == 0 {
 		v = version
 	}
-	ret := fmt.Sprintf(
+	ret, err := url.Parse(fmt.Sprintf(
 		"/services/data/v%s/sobjects/%s/%s/",
 		v,
 		req.SObjectApiName,
 		req.RecordId,
-	)
+	))
+	if err != nil {
+		return nil, err
+	}
 	if len(req.Fields) > 0 {
-		ret = fmt.Sprintf(
-			"%s?fields=%s",
-			ret,
+		q := ret.Query()
+		q.Add(
+			"fields",
 			req.Fields,
 		)
+		ret.RawQuery = q.Encode()
 	}
 
-	return ret
+	return ret, nil
 }
 func (req GetSObjectRequest) GetBody() ([]byte, error) {
 	return nil, nil

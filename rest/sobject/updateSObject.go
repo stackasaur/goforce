@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -18,10 +19,10 @@ type UpdateSObjectRequest struct {
 	IfUnmodifiedSince time.Time
 }
 
-func (req UpdateSObjectRequest) GetMethod() string {
-	return http.MethodPatch
+func (req UpdateSObjectRequest) GetMethod() (string, error) {
+	return http.MethodPatch, nil
 }
-func (req UpdateSObjectRequest) GetHeaders() map[string]string {
+func (req UpdateSObjectRequest) GetHeaders() (map[string]string, error) {
 	headers := map[string]string{
 		"Content-Type": "application/json",
 	}
@@ -42,24 +43,27 @@ func (req UpdateSObjectRequest) GetHeaders() map[string]string {
 			time.RFC1123,
 		)
 	}
-	return headers
+	return headers, nil
 }
 func (req UpdateSObjectRequest) GetPath(
 	version string,
-) string {
+) (*url.URL, error) {
 	v := req.Version
 	if len(v) == 0 {
 		v = version
 	}
 
-	ret := fmt.Sprintf(
+	ret, err := url.Parse(fmt.Sprintf(
 		"/services/data/v%s/sobjects/%s/%s/",
 		version,
 		req.SObjectApiName,
 		req.RecordId,
-	)
+	))
+	if err != nil {
+		return nil, err
+	}
 
-	return ret
+	return ret, nil
 }
 func (req UpdateSObjectRequest) GetBody() ([]byte, error) {
 	return json.Marshal(req.Fields)

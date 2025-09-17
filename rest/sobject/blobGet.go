@@ -3,6 +3,7 @@ package sobject
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 )
 
 type BlobGetRequest struct {
@@ -12,28 +13,31 @@ type BlobGetRequest struct {
 	BlobField      string
 }
 
-func (req BlobGetRequest) GetMethod() string {
-	return http.MethodGet
+func (req BlobGetRequest) GetMethod() (string, error) {
+	return http.MethodGet, nil
 }
-func (req BlobGetRequest) GetHeaders() map[string]string {
-	return nil
+func (req BlobGetRequest) GetHeaders() (map[string]string, error) {
+	return nil, nil
 }
 func (req BlobGetRequest) GetPath(
 	version string,
-) string {
+) (*url.URL, error) {
 	v := req.Version
 	if len(v) == 0 {
 		v = version
 	}
-	ret := fmt.Sprintf(
+	ret, err := url.Parse(fmt.Sprintf(
 		"/services/data/v%s/sobjects/%s/%s/%s",
 		v,
 		req.SObjectApiName,
 		req.RecordId,
 		req.BlobField,
-	)
+	))
+	if err != nil {
+		return nil, err
+	}
 
-	return ret
+	return ret, nil
 }
 func (req BlobGetRequest) GetBody() ([]byte, error) {
 	return nil, nil
