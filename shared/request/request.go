@@ -130,6 +130,6 @@ type ApiError struct {
 	Fields    []string `json:"fields"`
 }
 
-func (r ApiError) Error() string {
+func (r *ApiError) Error() string {
 	return fmt.Sprintf("%s: %s", r.ErrorCode, r.Message)
 }
