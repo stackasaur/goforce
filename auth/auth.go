@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 )
 
@@ -19,8 +20,12 @@ type Token struct {
 // is expected to simply call NewToken when no token exists and refresh token
 // when a 401 error is returned or the Expiration of the token is reached.
 type AuthFlow interface {
-	NewToken() (Token, error)
-	RefreshToken() (Token, error)
+	NewToken(
+		httpClient *http.Client,
+	) (Token, error)
+	RefreshToken(
+		httpClient *http.Client,
+	) (Token, error)
 }
 
 // default endpoints for ease
