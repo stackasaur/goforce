@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/stackasaur/goforce/auth"
@@ -43,6 +44,17 @@ func (client *Client) SetVersion(
 	return nil
 }
 
+func (client *Client) GetUserId() string {
+	userId := client.token.Id
+	if len(userId) == 0 {
+		return ""
+	}
+	splt := strings.Split(client.token.Id, "/")
+
+	return splt[len(splt)-1]
+
+}
+
 func (client *Client) Send(
 	req Req.SfdcRequest,
 ) (*http.Response, error) {
@@ -52,7 +64,9 @@ func (client *Client) Send(
 
 	if !token.Expiration.After(time.Now()) {
 		var err error
-		token, err = client.authFlow.RefreshToken()
+		token, err = client.authFlow.RefreshToken(
+			httpClient,
+		)
 		client.token = token
 		if err != nil {
 			return nil, err
@@ -85,7 +99,9 @@ func (client *Client) Send(
 		// refresh token and try again
 
 		var err error
-		token, err = client.authFlow.RefreshToken()
+		token, err = client.authFlow.RefreshToken(
+			httpClient,
+		)
 		client.token = token
 		if err != nil {
 			return nil, err
@@ -132,7 +148,9 @@ func NewClient(
 	}
 
 	authFlow := config.AuthFlow
-	token, err := authFlow.NewToken()
+	token, err := authFlow.NewToken(
+		httpClient,
+	)
 	if err != nil {
 		return nil, err
 	}
