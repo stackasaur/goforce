@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 )
@@ -121,4 +122,14 @@ func SfdcRequestAsHttpRequest(
 
 	return ret, nil
 
+}
+
+type ApiError struct {
+	Message   string   `json:"message"`
+	ErrorCode string   `json:"errorCode"`
+	Fields    []string `json:"fields"`
+}
+
+func (r ApiError) Error() string {
+	return fmt.Sprintf("%s: %s", r.ErrorCode, r.Message)
 }
