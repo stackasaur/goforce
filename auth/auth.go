@@ -8,6 +8,7 @@ import (
 // abstraction of the token.
 
 type Token struct {
+	Id          string
 	AccessToken string
 	InstanceUrl string
 	Expiration  time.Time
@@ -33,6 +34,7 @@ type TokenResponse struct {
 	RefreshToken string `json:"refresh_token"`
 	InstanceUrl  string `json:"instance_url"`
 	IssuedAt     int64  `json:"issued_at"`
+	Id           string `json:"id"`
 }
 
 type AuthError struct {

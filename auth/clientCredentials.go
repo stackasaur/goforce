@@ -45,6 +45,7 @@ func (flow *ClientCredentialsFlow) NewToken(
 			AccessToken: tokenResponse.AccessToken,
 			InstanceUrl: tokenResponse.InstanceUrl,
 			Expiration:  expiration,
+			Id:          tokenResponse.Id,
 		}, nil
 	}
 	var errorResponse AuthError
