@@ -1,0 +1,120 @@
+package request
+
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"net/http"
+)
+
+type SfdcRequest interface {
+	GetMethod() (string, error)
+	GetHeaders() (map[string]string, error)
+	GetPath(
+		string,
+	) (string, error)
+	GetBody() ([]byte, error)
+}
+
+type GenericRequest struct {
+	Headers map[string]string
+	Method  string
+	Path    string
+	Body    []byte
+}
+
+func (req GenericRequest) GetMethod() (string, error) {
+	return req.Method, nil
+}
+func (req GenericRequest) GetHeaders() (map[string]string, error) {
+	return req.Headers, nil
+}
+func (req GenericRequest) GetPath(
+	_ string,
+) (string, error) {
+	return req.Path, nil
+}
+func (req GenericRequest) GetBody() ([]byte, error) {
+	return req.Body, nil
+}
+
+type CompositeSubrequest struct {
+	HttpHeaders map[string]string `json:"httpHeaders"`
+	Method      string            `json:"method"`
+	ReferenceId string            `json:"referenceId"`
+	Url         string            `json:"url"`
+	Body        *json.RawMessage  `json:"body"`
+}
+
+type SubRequestable interface {
+	IntoSubRequest() CompositeSubrequest
+}
+
+// converts a SfdcRequest into an http request to be called by a client.
+// this is used internally by the sfdc client when send it invoked.
+func SfdcRequestAsHttpRequest(
+	sfdcReq SfdcRequest,
+	version string,
+) (*http.Request, error) {
+	bodyBytes, err := sfdcReq.GetBody()
+	if err != nil {
+		return nil, errors.Join(
+			errors.New(
+				"error getting body",
+			),
+			err,
+		)
+	}
+	method, err := sfdcReq.GetMethod()
+	if err != nil {
+		return nil, errors.Join(
+			errors.New(
+				"error getting method",
+			),
+			err,
+		)
+	}
+	path, err := sfdcReq.GetPath(version)
+	if err != nil {
+		return nil, errors.Join(
+			errors.New(
+				"error getting path",
+			),
+			err,
+		)
+	}
+	headers, err := sfdcReq.GetHeaders()
+	if err != nil {
+		return nil, errors.Join(
+			errors.New(
+				"error getting headers",
+			),
+			err,
+		)
+	}
+	ret, err := http.NewRequest(
+		method,
+		path,
+		bytes.NewReader(
+			bodyBytes,
+		),
+	)
+	if err != nil {
+		return nil, errors.Join(
+			errors.New(
+				"error building request",
+			),
+			err,
+		)
+	}
+
+	for key, value := range headers {
+		ret.Header.Add(
+			key,
+			value,
+		)
+	}
+
+	return ret, nil
+
+}
