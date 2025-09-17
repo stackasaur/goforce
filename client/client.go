@@ -3,12 +3,20 @@ package client
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
+	"time"
+
+	"github.com/stackasaur/goforce/auth"
+	Req "github.com/stackasaur/goforce/shared/request"
 )
 
 type Client struct {
 	context    context.Context
 	httpClient *http.Client
+	authFlow   auth.AuthFlow
+	token      auth.Token
 	version    string
 }
 
@@ -35,9 +43,68 @@ func (client *Client) SetVersion(
 	return nil
 }
 
+func (client *Client) Send(
+	req Req.SfdcRequest,
+) (*http.Response, error) {
+	httpClient := client.GetHttpClient()
+
+	token := client.token
+
+	if !token.Expiration.After(time.Now()) {
+		var err error
+		token, err = client.authFlow.RefreshToken()
+		client.token = token
+		if err != nil {
+			return nil, err
+		}
+	}
+	baseUrl, err := url.Parse(token.InstanceUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	httpRequest, err := Req.SfdcRequestAsHttpRequest(
+		req,
+		baseUrl,
+		client.version,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	httpRequest.Header.Set(
+		"Authorization",
+		fmt.Sprintf("Bearer %v", token.AccessToken),
+	)
+
+	httpResponse, err := httpClient.Do(httpRequest)
+	if err != nil {
+		return nil, err
+	}
+	if httpResponse.StatusCode == 401 {
+		// refresh token and try again
+
+		var err error
+		token, err = client.authFlow.RefreshToken()
+		client.token = token
+		if err != nil {
+			return nil, err
+		}
+		httpRequest.Header.Set(
+			"Authorization",
+			fmt.Sprintf("Bearer %v", token.AccessToken),
+		)
+
+		return httpClient.Do(httpRequest)
+	}
+
+	return httpResponse, nil
+}
+
 type ClientConfig struct {
 	HttpClient *http.Client
 	Context    context.Context
+	AuthFlow   auth.AuthFlow
 	Version    string
 }
 
@@ -60,10 +127,22 @@ func NewClient(
 		return nil, errors.New("invalid version")
 	}
 
+	if config.AuthFlow == nil {
+		return nil, errors.New("authflow is required")
+	}
+
+	authFlow := config.AuthFlow
+	token, err := authFlow.NewToken()
+	if err != nil {
+		return nil, err
+	}
+
 	client := Client{
 		context:    ctx,
 		httpClient: httpClient,
 		version:    version,
+		authFlow:   config.AuthFlow,
+		token:      token,
 	}
 
 	return &client, nil
