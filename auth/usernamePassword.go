@@ -18,7 +18,7 @@ type UsernamePasswordFlow struct {
 	TokenEndpoint string
 }
 
-func (flow UsernamePasswordFlow) NewToken(
+func (flow *UsernamePasswordFlow) NewToken(
 	httpClient *http.Client,
 ) (Token, error) {
 	payload := make(url.Values)
@@ -73,7 +73,7 @@ func (flow UsernamePasswordFlow) NewToken(
 		errorResponse,
 	)
 }
-func (flow UsernamePasswordFlow) RefreshToken(
+func (flow *UsernamePasswordFlow) RefreshToken(
 	httpClient *http.Client,
 ) (Token, error) {
 	return flow.NewToken(httpClient)
