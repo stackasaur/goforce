@@ -8,7 +8,6 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	t.Log("testing")
 	clientId := os.Getenv("CLIENT_ID")
 	clientSecret := os.Getenv("CLIENT_SECRET")
 	tokenEndpoint := os.Getenv("TOKEN_ENDPOINT")
