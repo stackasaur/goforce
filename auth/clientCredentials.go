@@ -14,7 +14,7 @@ type ClientCredentialsFlow struct {
 	TokenEndpoint string
 }
 
-func (flow *ClientCredentialsFlow) NewToken(
+func (flow ClientCredentialsFlow) NewToken(
 	httpClient *http.Client,
 ) (Token, error) {
 	payload := make(url.Values)
@@ -61,7 +61,7 @@ func (flow *ClientCredentialsFlow) NewToken(
 		errorResponse,
 	)
 }
-func (flow *ClientCredentialsFlow) RefreshToken(
+func (flow ClientCredentialsFlow) RefreshToken(
 	httpClient *http.Client,
 ) (Token, error) {
 	return flow.NewToken(httpClient)
