@@ -81,6 +81,8 @@ func TestQuery(t *testing.T) {
 		)
 	}
 
+	t.Log(accounts)
+
 	badQueryRequest := QueryRequest{
 		Version: "60.0",
 		Query:   "SELECT Id, Name, FROM Account LIMIT 1",
