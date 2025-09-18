@@ -1,10 +1,14 @@
 package sobject
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/stackasaur/goforce/client"
+	Req "github.com/stackasaur/goforce/shared/request"
 )
 
 type GetSObjectRequest struct {
@@ -71,4 +75,36 @@ func (req GetSObjectRequest) GetPath(
 }
 func (req GetSObjectRequest) GetBody() ([]byte, error) {
 	return nil, nil
+}
+
+func GetSObject[T any](
+	sfdcClient client.Client,
+	request GetSObjectRequest,
+) (*T, error) {
+	httpResponse, err := sfdcClient.Send(
+		request,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResponse.Body.Close()
+	if httpResponse.StatusCode == 200 {
+		var ret T
+		decodeError := json.NewDecoder(httpResponse.Body).Decode(&ret)
+
+		if decodeError != nil {
+			return nil, err
+		}
+		return &ret, nil
+	}
+
+	var errorResponse []Req.ApiError
+	decodeError := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
+	if decodeError != nil {
+		return nil, err
+	}
+	if len(errorResponse) > 0 {
+		return nil, errorResponse[0]
+	}
+	return nil, ErrUnknown
 }
