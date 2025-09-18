@@ -21,7 +21,7 @@ func TestClient(t *testing.T) {
 
 	sfdcClient, err := NewClient(
 		ClientConfig{
-			Version:  "60.0",
+			Version:  60,
 			AuthFlow: authFlow,
 		},
 	)
@@ -30,6 +30,11 @@ func TestClient(t *testing.T) {
 	}
 
 	userId := sfdcClient.GetUserId()
+
+	t.Logf(
+		"userId: %s",
+		userId,
+	)
 
 	if len(userId) == 0 {
 		t.Fatal(
