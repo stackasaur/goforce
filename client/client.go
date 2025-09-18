@@ -33,17 +33,8 @@ func (client *Client) GetVersion() string {
 func (client *Client) SetVersion(
 	version int,
 ) error {
-	if version == 0 {
-		return ClientError{
-			ErrorCode:        "VERSION_ERROR",
-			ErrorDescription: "version must be specified",
-		}
-	}
-	if !validateVersion(version) {
-		return ClientError{
-			ErrorCode:        "VERSION_ERROR",
-			ErrorDescription: "invalid version",
-		}
+	if version == 0 || !validateVersion(version) {
+		return ErrVersion
 	}
 	client.version = toVersionString(version)
 
@@ -76,23 +67,14 @@ func (client *Client) Send(
 		client.token = token
 		if err != nil {
 			return nil, errors.Join(
-				ClientError{
-					ErrorCode:        "TOKEN_ERROR",
-					ErrorDescription: "error refreshing token",
-				},
+				ErrToken,
 				err,
 			)
 		}
 	}
 	baseUrl, err := url.Parse(token.InstanceUrl)
 	if err != nil {
-		return nil, errors.Join(
-			ClientError{
-				ErrorCode:        "URL_ERROR",
-				ErrorDescription: "error parsing url",
-			},
-			err,
-		)
+		return nil, err
 	}
 
 	httpRequest, err := Req.SfdcRequestAsHttpRequest(
@@ -101,13 +83,7 @@ func (client *Client) Send(
 		client.version,
 	)
 	if err != nil {
-		return nil, errors.Join(
-			ClientError{
-				ErrorCode:        "REQUEST_ERROR",
-				ErrorDescription: "error compiling request",
-			},
-			err,
-		)
+		return nil, err
 	}
 
 	httpRequest.Header.Set(
@@ -117,13 +93,7 @@ func (client *Client) Send(
 
 	httpResponse, err := httpClient.Do(httpRequest)
 	if err != nil {
-		return nil, errors.Join(
-			ClientError{
-				ErrorCode:        "HTTP_ERROR",
-				ErrorDescription: "error performing request",
-			},
-			err,
-		)
+		return nil, err
 	}
 	if httpResponse.StatusCode == 401 {
 		// refresh token and try again
@@ -135,10 +105,7 @@ func (client *Client) Send(
 
 		if err != nil {
 			return nil, errors.Join(
-				ClientError{
-					ErrorCode:        "TOKEN_ERROR",
-					ErrorDescription: "error refreshing token",
-				},
+				ErrToken,
 				err,
 			)
 		}
@@ -177,17 +144,11 @@ func NewClient(
 		version = DefaultVersion
 	}
 	if !validateVersion(version) {
-		return nil, ClientError{
-			ErrorCode:        "VERSION_ERROR",
-			ErrorDescription: "invalid version",
-		}
+		return nil, ErrVersion
 	}
 
 	if config.AuthFlow == nil {
-		return nil, ClientError{
-			ErrorCode:        "AUTHFLOW_ERROR",
-			ErrorDescription: "authflow is required",
-		}
+		return nil, ErrAuthFlow
 	}
 
 	authFlow := config.AuthFlow
@@ -196,10 +157,7 @@ func NewClient(
 	)
 	if err != nil {
 		return nil, errors.Join(
-			ClientError{
-				ErrorCode:        "TOKEN_ERROR",
-				ErrorDescription: "error getting token",
-			},
+			ErrToken,
 			err,
 		)
 	}
@@ -215,15 +173,6 @@ func NewClient(
 	return &client, nil
 }
 
-type ClientError struct {
-	ErrorCode        string
-	ErrorDescription string
-}
-
-func (err ClientError) Error() string {
-	return fmt.Sprintf(
-		"%s: %s",
-		err.ErrorCode,
-		err.ErrorDescription,
-	)
-}
+var ErrToken = errors.New("error getting token")
+var ErrVersion = errors.New("invalid version")
+var ErrAuthFlow = errors.New("invalid auth flow")
