@@ -72,10 +72,7 @@ func Query[T any](
 		decodeError := json.NewDecoder(httpResponse.Body).Decode(&queryResponse)
 
 		if decodeError != nil {
-			return nil, errors.Join(
-				decodeError,
-				errors.New("error execting query"),
-			)
+			return nil, err
 		}
 		return queryResponse.Records, nil
 	}
@@ -83,17 +80,13 @@ func Query[T any](
 	var errorResponse []Req.ApiError
 	decodeError := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
 	if decodeError != nil {
-		return nil, errors.Join(
-			decodeError,
-			errors.New("error decoding response"),
-		)
+		return nil, err
 	}
 	if len(errorResponse) > 0 {
-		return nil, errors.Join(
-			errorResponse[0],
-			errors.New("sfdc query error"),
-		)
+		return nil, errorResponse[0]
 	}
-	return nil, errors.New("unexpected query error")
+	return nil, ErrUnknown
 
 }
+
+var ErrUnknown = errors.New("unknown query error")
