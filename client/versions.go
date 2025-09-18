@@ -1,11 +1,20 @@
 package client
 
-import "regexp"
+import "fmt"
 
-const DefaultVersion string = "65.0"
+const MaxSupportedVersion int = 65
+const MinSupportedVersion int = 40
 
-var VersionRegexp *regexp.Regexp = regexp.MustCompile(`^\d+.\d$`)
+const DefaultVersion = MaxSupportedVersion
 
-func ValidateVersion(version string) bool {
-	return VersionRegexp.MatchString(version)
+func validateVersion(version int) bool {
+	return version <= MaxSupportedVersion &&
+		version >= MinSupportedVersion
+}
+
+func toVersionString(version int) string {
+	return fmt.Sprintf(
+		"%d.0",
+		version,
+	)
 }

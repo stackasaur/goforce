@@ -31,15 +31,15 @@ func (client *Client) GetVersion() string {
 	return client.version
 }
 func (client *Client) SetVersion(
-	version string,
+	version int,
 ) error {
-	if len(version) == 0 {
+	if version == 0 {
 		return errors.New("version must be specified")
 	}
-	if !ValidateVersion(version) {
+	if !validateVersion(version) {
 		return errors.New("invalid version")
 	}
-	client.version = version
+	client.version = toVersionString(version)
 
 	return nil
 }
@@ -121,7 +121,7 @@ type ClientConfig struct {
 	HttpClient *http.Client
 	Context    context.Context
 	AuthFlow   auth.AuthFlow
-	Version    string
+	Version    int
 }
 
 func NewClient(
@@ -136,10 +136,10 @@ func NewClient(
 		httpClient = &http.Client{}
 	}
 	version := config.Version
-	if len(version) == 0 {
+	if version == 0 {
 		version = DefaultVersion
 	}
-	if !ValidateVersion(version) {
+	if !validateVersion(version) {
 		return nil, errors.New("invalid version")
 	}
 
@@ -158,7 +158,7 @@ func NewClient(
 	client := Client{
 		context:    ctx,
 		httpClient: httpClient,
-		version:    version,
+		version:    toVersionString(version),
 		authFlow:   config.AuthFlow,
 		token:      token,
 	}
