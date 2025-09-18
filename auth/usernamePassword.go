@@ -39,13 +39,7 @@ func (flow UsernamePasswordFlow) NewToken(
 		payload,
 	)
 	if err != nil {
-		return Token{}, errors.Join(
-			AuthError{
-				ErrorCode:        "HTTP_ERROR",
-				ErrorDescription: "error creating request",
-			},
-			err,
-		)
+		return Token{}, err
 	}
 	defer res.Body.Close()
 
