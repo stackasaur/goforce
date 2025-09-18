@@ -8,12 +8,7 @@ import (
 	"github.com/stackasaur/goforce/client"
 )
 
-type Account struct {
-	Id   string `json:",omitempty"`
-	Name string
-}
-
-func TestGetSObject(t *testing.T) {
+func TestBlobCreate(t *testing.T) {
 	clientId := os.Getenv("CLIENT_ID")
 	clientSecret := os.Getenv("CLIENT_SECRET")
 	tokenEndpoint := os.Getenv("TOKEN_ENDPOINT")
@@ -35,19 +30,37 @@ func TestGetSObject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	getSObjectRequest := GetSObjectRequest{
-		SObjectApiName: "Account",
-		RecordId:       recordId,
-		Fields:         "Id,Name",
+	blobCreateRequest := BlobCreateRequest{
+		SObjectApiName: "Attachment",
+		BinaryPartName: "Body",
+		BinaryData:     []byte("testing"),
+		FieldsPartName: "entity_attachment",
+		Fields: map[string]any{
+			"ParentId": recordId,
+			"Name":     "test.txt",
+		},
+		FileName: "test.txt",
 	}
 
-	account, err := GetSObject[Account](
+	recordId, err = BlobCreate(
 		*sfdcClient,
-		getSObjectRequest,
+		blobCreateRequest,
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	t.Log(account)
+	t.Log(recordId)
+
+	deleteSObjectRequest := DeleteSObjectRequest{
+		SObjectApiName: "Attachment",
+		RecordId:       recordId,
+	}
+	err = DeleteSObject(
+		*sfdcClient,
+		deleteSObjectRequest,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
 }

@@ -9,6 +9,10 @@ import (
 	"net/http"
 	"net/textproto"
 	"net/url"
+	"time"
+
+	"github.com/stackasaur/goforce/client"
+	Req "github.com/stackasaur/goforce/shared/request"
 )
 
 type BlobCreateRequest struct {
@@ -21,11 +25,21 @@ type BlobCreateRequest struct {
 	FileName       string
 }
 
+var boundary string = fmt.Sprintf(
+	"goforce%x",
+	time.Now().UnixMilli(),
+)
+
 func (req BlobCreateRequest) GetMethod() (string, error) {
 	return http.MethodPost, nil
 }
 func (req BlobCreateRequest) GetHeaders() (map[string]string, error) {
-	return nil, nil
+	return map[string]string{
+		"Content-Type": fmt.Sprintf(
+			"multipart/form-data; boundary=%s",
+			boundary,
+		),
+	}, nil
 }
 func (req BlobCreateRequest) GetPath(
 	version string,
@@ -57,6 +71,7 @@ func (req BlobCreateRequest) GetBody() ([]byte, error) {
 	requestBody := bytes.Buffer{}
 
 	multipartWriter := multipart.NewWriter(&requestBody)
+	multipartWriter.SetBoundary(boundary)
 
 	h := make(textproto.MIMEHeader)
 	h.Set(
@@ -106,4 +121,40 @@ func (req BlobCreateRequest) GetBody() ([]byte, error) {
 
 	multipartWriter.Close()
 	return requestBody.Bytes(), nil
+}
+
+func BlobCreate(
+	sfdcClient client.Client,
+	request BlobCreateRequest,
+) (string, error) {
+	httpResponse, err := sfdcClient.Send(
+		request,
+	)
+	if err != nil {
+		return "", err
+	}
+	defer httpResponse.Body.Close()
+	if httpResponse.StatusCode == 201 {
+		var ret SObjectResponse
+		decodeError := json.NewDecoder(httpResponse.Body).Decode(&ret)
+
+		if decodeError != nil {
+			return "", decodeError
+		}
+
+		if ret.Success {
+			return ret.Id, nil
+		} else {
+			return "", ret.Errors[0]
+		}
+	}
+	var errorResponse []Req.ApiError
+	decodeError := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
+	if decodeError != nil {
+		return "", decodeError
+	}
+	if len(errorResponse) > 0 {
+		return "", errorResponse[0]
+	}
+	return "", ErrUnknown
 }

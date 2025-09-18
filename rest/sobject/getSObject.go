@@ -93,7 +93,7 @@ func GetSObject[T any](
 		decodeError := json.NewDecoder(httpResponse.Body).Decode(&ret)
 
 		if decodeError != nil {
-			return nil, err
+			return nil, decodeError
 		}
 		return &ret, nil
 	}
@@ -101,7 +101,7 @@ func GetSObject[T any](
 	var errorResponse []Req.ApiError
 	decodeError := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
 	if decodeError != nil {
-		return nil, err
+		return nil, decodeError
 	}
 	if len(errorResponse) > 0 {
 		return nil, errorResponse[0]

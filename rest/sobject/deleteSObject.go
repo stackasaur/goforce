@@ -1,10 +1,14 @@
 package sobject
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/stackasaur/goforce/client"
+	Req "github.com/stackasaur/goforce/shared/request"
 )
 
 type DeleteSObjectRequest struct {
@@ -63,4 +67,29 @@ func (req DeleteSObjectRequest) GetPath(
 }
 func (req DeleteSObjectRequest) GetBody() ([]byte, error) {
 	return nil, nil
+}
+
+func DeleteSObject(
+	sfdcClient client.Client,
+	request DeleteSObjectRequest,
+) error {
+	httpResponse, err := sfdcClient.Send(
+		request,
+	)
+	if err != nil {
+		return err
+	}
+	defer httpResponse.Body.Close()
+	if httpResponse.StatusCode == 204 {
+		return nil
+	}
+	var errorResponse []Req.ApiError
+	decodeError := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
+	if decodeError != nil {
+		return decodeError
+	}
+	if len(errorResponse) > 0 {
+		return errorResponse[0]
+	}
+	return ErrUnknown
 }

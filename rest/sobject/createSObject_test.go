@@ -1,23 +1,19 @@
 package sobject
 
 import (
+	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stackasaur/goforce/auth"
 	"github.com/stackasaur/goforce/client"
 )
 
-type Account struct {
-	Id   string `json:",omitempty"`
-	Name string
-}
-
-func TestGetSObject(t *testing.T) {
+func TestCreateSObject(t *testing.T) {
 	clientId := os.Getenv("CLIENT_ID")
 	clientSecret := os.Getenv("CLIENT_SECRET")
 	tokenEndpoint := os.Getenv("TOKEN_ENDPOINT")
-	recordId := os.Getenv("ACCOUNT_ID")
 
 	authFlow := auth.ClientCredentialsFlow{
 		ClientId:      clientId,
@@ -35,19 +31,35 @@ func TestGetSObject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	getSObjectRequest := GetSObjectRequest{
+	createSObjectRequest := CreateSObjectRequest{
 		SObjectApiName: "Account",
-		RecordId:       recordId,
-		Fields:         "Id,Name",
+		Fields: Account{
+			Name: fmt.Sprintf(
+				"test_%d",
+				time.Now().UnixMilli(),
+			),
+		},
 	}
 
-	account, err := GetSObject[Account](
+	recordId, err := CreateSObject(
 		*sfdcClient,
-		getSObjectRequest,
+		createSObjectRequest,
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	t.Log(account)
+	t.Log(recordId)
+
+	deleteSObjectRequest := DeleteSObjectRequest{
+		SObjectApiName: "Account",
+		RecordId:       recordId,
+	}
+	err = DeleteSObject(
+		*sfdcClient,
+		deleteSObjectRequest,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
 }

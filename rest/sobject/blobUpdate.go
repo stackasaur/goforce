@@ -9,6 +9,9 @@ import (
 	"net/http"
 	"net/textproto"
 	"net/url"
+
+	"github.com/stackasaur/goforce/client"
+	Req "github.com/stackasaur/goforce/shared/request"
 )
 
 type BlobUpdateRequest struct {
@@ -108,4 +111,29 @@ func (req BlobUpdateRequest) GetBody() ([]byte, error) {
 
 	multipartWriter.Close()
 	return requestBody.Bytes(), nil
+}
+
+func BlobUpdate(
+	sfdcClient client.Client,
+	request BlobUpdateRequest,
+) error {
+	httpResponse, err := sfdcClient.Send(
+		request,
+	)
+	if err != nil {
+		return err
+	}
+	defer httpResponse.Body.Close()
+	if httpResponse.StatusCode >= 200 && httpResponse.StatusCode < 300 {
+		return nil
+	}
+	var errorResponse []Req.ApiError
+	decodeError := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
+	if decodeError != nil {
+		return decodeError
+	}
+	if len(errorResponse) > 0 {
+		return errorResponse[0]
+	}
+	return ErrUnknown
 }

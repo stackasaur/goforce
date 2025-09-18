@@ -124,7 +124,7 @@ func Query[T any](
 		decodeError := json.NewDecoder(httpResponse.Body).Decode(&queryResponse)
 
 		if decodeError != nil {
-			return nil, err
+			return nil, decodeError
 		}
 		return queryResponse.Records, nil
 	}
@@ -132,7 +132,7 @@ func Query[T any](
 	var errorResponse []Req.ApiError
 	decodeError := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
 	if decodeError != nil {
-		return nil, err
+		return nil, decodeError
 	}
 	if len(errorResponse) > 0 {
 		return nil, errorResponse[0]
@@ -157,7 +157,7 @@ func handleQueryRequest[T any](
 		decodeError := json.NewDecoder(httpResponse.Body).Decode(&queryResponse)
 
 		if decodeError != nil {
-			return nil, err
+			return nil, decodeError
 		}
 		return &queryResponse, nil
 	}
@@ -165,7 +165,7 @@ func handleQueryRequest[T any](
 	var errorResponse []Req.ApiError
 	decodeError := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
 	if decodeError != nil {
-		return nil, err
+		return nil, decodeError
 	}
 	if len(errorResponse) > 0 {
 		return nil, errorResponse[0]
