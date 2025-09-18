@@ -124,6 +124,8 @@ func SfdcRequestAsHttpRequest(
 
 }
 
+// a custom error type to denote an actual error received from a salesforce api.
+// a general http request error such as a timeout would not generate this error.
 type ApiError struct {
 	Message   string   `json:"message"`
 	ErrorCode string   `json:"errorCode"`
