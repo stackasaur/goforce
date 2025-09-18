@@ -40,7 +40,10 @@ func (flow UsernamePasswordFlow) NewToken(
 	)
 	if err != nil {
 		return Token{}, errors.Join(
-			errors.New("error creating request"),
+			AuthError{
+				ErrorCode:        "HTTP_ERROR",
+				ErrorDescription: "error creating request",
+			},
 			err,
 		)
 	}
@@ -64,14 +67,14 @@ func (flow UsernamePasswordFlow) NewToken(
 	decodeError := json.NewDecoder(res.Body).Decode(&errorResponse)
 	if decodeError != nil {
 		return Token{}, errors.Join(
-			errors.New("error decoding sfdc auth response"),
+			AuthError{
+				ErrorCode:        "DECODING_ERROR",
+				ErrorDescription: "error decoding sfdc auth response",
+			},
 			decodeError,
 		)
 	}
-	return Token{}, errors.Join(
-		errors.New("sfdc auth error"),
-		errorResponse,
-	)
+	return Token{}, errorResponse
 }
 func (flow UsernamePasswordFlow) RefreshToken(
 	httpClient *http.Client,
