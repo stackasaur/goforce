@@ -43,13 +43,48 @@ func (req GenericRequest) GetBody() ([]byte, error) {
 type CompositeSubrequest struct {
 	HttpHeaders map[string]string `json:"httpHeaders"`
 	Method      string            `json:"method"`
-	ReferenceId string            `json:"referenceId"`
+	ReferenceId string            `json:"referenceId,omitempty"`
 	Url         string            `json:"url"`
-	Body        *json.RawMessage  `json:"body"`
+	Body        *json.RawMessage  `json:"body,omitempty"`
 }
 
 type SubRequestable interface {
 	IntoSubRequest() CompositeSubrequest
+}
+
+func SfdcRequestAsSubRequest(
+	sfdcReq SfdcRequest,
+	version string,
+	referenceId string,
+) (*CompositeSubrequest, error) {
+	headers, err := sfdcReq.GetHeaders()
+	if err != nil {
+		return nil, err
+	}
+	method, err := sfdcReq.GetMethod()
+	if err != nil {
+		return nil, err
+	}
+	path, err := sfdcReq.GetPath(version)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := sfdcReq.GetBody()
+	if err != nil {
+		return nil, err
+	}
+
+	rawBody := json.RawMessage(body)
+	ret := CompositeSubrequest{
+		HttpHeaders: headers,
+		Method:      method,
+		ReferenceId: referenceId,
+		Url:         path.String(),
+		Body:        &rawBody,
+	}
+
+	return &ret, nil
 }
 
 // converts a SfdcRequest into an http request to be called by a client.
