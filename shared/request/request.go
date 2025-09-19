@@ -49,7 +49,7 @@ type CompositeSubrequest struct {
 }
 
 type SubRequestable interface {
-	IntoSubRequest() CompositeSubrequest
+	IntoSubRequest() (CompositeSubrequest, error)
 }
 
 func SfdcRequestAsSubRequest(
