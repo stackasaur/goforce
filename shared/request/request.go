@@ -9,7 +9,6 @@ import (
 )
 
 type SfdcRequest interface {
-	GetVersion() (string, error)
 	GetMethod() (string, error)
 	GetHeaders() (map[string]string, error)
 	GetPath(
