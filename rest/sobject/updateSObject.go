@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/stackasaur/goforce/client"
+	Req "github.com/stackasaur/goforce/shared/request"
 )
 
 type UpdateSObjectRequest struct {
@@ -67,4 +70,29 @@ func (req UpdateSObjectRequest) GetPath(
 }
 func (req UpdateSObjectRequest) GetBody() ([]byte, error) {
 	return json.Marshal(req.Fields)
+}
+
+func UpdateSObject(
+	sfdcClient client.Client,
+	request UpdateSObjectRequest,
+) error {
+	httpResponse, err := sfdcClient.Send(
+		request,
+	)
+	if err != nil {
+		return err
+	}
+	defer httpResponse.Body.Close()
+	if httpResponse.StatusCode >= 200 && httpResponse.StatusCode < 300 {
+		return nil
+	}
+	var errorResponse []Req.ApiError
+	decodeError := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
+	if decodeError != nil {
+		return decodeError
+	}
+	if len(errorResponse) > 0 {
+		return errorResponse[0]
+	}
+	return ErrUnknown
 }

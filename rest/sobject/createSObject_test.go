@@ -10,7 +10,12 @@ import (
 	"github.com/stackasaur/goforce/client"
 )
 
-func TestCreateSObject(t *testing.T) {
+type Account struct {
+	Id   string `json:",omitempty"`
+	Name string
+}
+
+func TestSObjectFunctions(t *testing.T) {
 	clientId := os.Getenv("CLIENT_ID")
 	clientSecret := os.Getenv("CLIENT_SECRET")
 	tokenEndpoint := os.Getenv("TOKEN_ENDPOINT")
@@ -31,13 +36,16 @@ func TestCreateSObject(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	name1 := fmt.Sprintf(
+		"test_%x",
+		time.Now().UnixMilli(),
+	)
+	name2 := name1 + "_2"
+
 	createSObjectRequest := CreateSObjectRequest{
 		SObjectApiName: "Account",
 		Fields: Account{
-			Name: fmt.Sprintf(
-				"test_%d",
-				time.Now().UnixMilli(),
-			),
+			Name: name1,
 		},
 	}
 
@@ -49,7 +57,59 @@ func TestCreateSObject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log(recordId)
+	getSObjectRequest := GetSObjectRequest{
+		SObjectApiName: "Account",
+		RecordId:       recordId,
+		Fields:         "Id,Name",
+	}
+
+	acct, err := GetSObject[Account](
+		*sfdcClient,
+		getSObjectRequest,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if acct.Name != name1 {
+		t.Fatalf(
+			"expected name: %s, received: %s",
+			name1,
+			acct.Name,
+		)
+	}
+
+	updateSObjectRequest := UpdateSObjectRequest{
+		SObjectApiName: "Account",
+		RecordId:       recordId,
+		Fields: Account{
+			Name: name2,
+		},
+	}
+
+	err = UpdateSObject(
+		*sfdcClient,
+		updateSObjectRequest,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	acct, err = GetSObject[Account](
+		*sfdcClient,
+		getSObjectRequest,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if acct.Name != name2 {
+		t.Fatalf(
+			"expected name: %s, received: %s",
+			name2,
+			acct.Name,
+		)
+	}
 
 	deleteSObjectRequest := DeleteSObjectRequest{
 		SObjectApiName: "Account",
@@ -61,5 +121,15 @@ func TestCreateSObject(t *testing.T) {
 	)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	_, err = GetSObject[Account](
+		*sfdcClient,
+		getSObjectRequest,
+	)
+	if err == nil {
+		t.Fatal(
+			"expected record to be deleted",
+		)
 	}
 }

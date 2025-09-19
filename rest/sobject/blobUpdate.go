@@ -1,139 +1,145 @@
 package sobject
 
-import (
-	"bytes"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"mime/multipart"
-	"net/http"
-	"net/textproto"
-	"net/url"
+// import (
+// 	"bytes"
+// 	"encoding/json"
+// 	"errors"
+// 	"fmt"
+// 	"mime/multipart"
+// 	"net/http"
+// 	"net/textproto"
+// 	"net/url"
 
-	"github.com/stackasaur/goforce/client"
-	Req "github.com/stackasaur/goforce/shared/request"
-)
+// 	"github.com/stackasaur/goforce/client"
+// 	Req "github.com/stackasaur/goforce/shared/request"
+// )
 
-type BlobUpdateRequest struct {
-	Version        string
-	SObjectApiName string
-	RecordId       string
-	BinaryPartName string
-	BinaryData     []byte
-	FieldsPartName string
-	Fields         any
-	FileName       string
-}
+// type BlobUpdateRequest struct {
+// 	Version        string
+// 	SObjectApiName string
+// 	RecordId       string
+// 	BinaryPartName string
+// 	BinaryData     []byte
+// 	FieldsPartName string
+// 	Fields         any
+// 	FileName       string
+// }
 
-func (req BlobUpdateRequest) GetMethod() (string, error) {
-	return http.MethodPatch, nil
-}
-func (req BlobUpdateRequest) GetHeaders() (map[string]string, error) {
-	return nil, nil
-}
-func (req BlobUpdateRequest) GetPath(
-	version string,
-) (*url.URL, error) {
-	v := req.Version
-	if len(v) == 0 {
-		v = version
-	}
-	ret, err := url.Parse(fmt.Sprintf(
-		"/services/data/v%s/sobjects/%s/%s",
-		v,
-		req.SObjectApiName,
-		req.RecordId,
-	))
-	if err != nil {
-		return nil, err
-	}
+// func (req BlobUpdateRequest) GetMethod() (string, error) {
+// 	return http.MethodPatch, nil
+// }
+// func (req BlobUpdateRequest) GetHeaders() (map[string]string, error) {
+// 	return map[string]string{
+// 		"Content-Type": fmt.Sprintf(
+// 			"multipart/form-data; boundary=%s",
+// 			boundary,
+// 		),
+// 	}, nil
+// }
+// func (req BlobUpdateRequest) GetPath(
+// 	version string,
+// ) (*url.URL, error) {
+// 	v := req.Version
+// 	if len(v) == 0 {
+// 		v = version
+// 	}
+// 	ret, err := url.Parse(fmt.Sprintf(
+// 		"/services/data/v%s/sobjects/%s/%s",
+// 		v,
+// 		req.SObjectApiName,
+// 		req.RecordId,
+// 	))
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return ret, nil
-}
-func (req BlobUpdateRequest) GetBody() ([]byte, error) {
-	fieldData, jsonErr := json.Marshal(req.Fields)
+// 	return ret, nil
+// }
+// func (req BlobUpdateRequest) GetBody() ([]byte, error) {
+// 	fieldData, jsonErr := json.Marshal(req.Fields)
 
-	if jsonErr != nil {
-		return nil, errors.Join(
-			jsonErr,
-			errors.New("error marshalling fields"),
-		)
-	}
-	requestBody := bytes.Buffer{}
+// 	if jsonErr != nil {
+// 		return nil, errors.Join(
+// 			jsonErr,
+// 			errors.New("error marshalling fields"),
+// 		)
+// 	}
+// 	requestBody := bytes.Buffer{}
 
-	multipartWriter := multipart.NewWriter(&requestBody)
+// 	multipartWriter := multipart.NewWriter(&requestBody)
+// 	multipartWriter.SetBoundary(boundary)
 
-	h := make(textproto.MIMEHeader)
-	h.Set(
-		"Content-Disposition",
-		fmt.Sprintf(
-			`form-data; name="%s"; filename=""`,
-			req.FieldsPartName,
-		),
-	)
-	h.Set(
-		"Content-Type",
-		"application/json",
-	)
-	fieldWriter, writerErr := multipartWriter.CreatePart(h)
+// 	h := make(textproto.MIMEHeader)
+// 	h.Set(
+// 		"Content-Disposition",
+// 		fmt.Sprintf(
+// 			`form-data; name="%s"; filename=""`,
+// 			req.FieldsPartName,
+// 		),
+// 	)
+// 	h.Set(
+// 		"Content-Type",
+// 		"application/json",
+// 	)
+// 	fieldWriter, writerErr := multipartWriter.CreatePart(h)
 
-	if writerErr != nil {
-		return nil, errors.Join(
-			writerErr,
-			errors.New("error creating form file writer"),
-		)
-	}
-	_, writerErr = fieldWriter.Write(fieldData)
-	if writerErr != nil {
-		return nil, errors.Join(
-			writerErr,
-			errors.New("error writing data to file"),
-		)
-	}
+// 	if writerErr != nil {
+// 		return nil, errors.Join(
+// 			writerErr,
+// 			errors.New("error creating form file writer"),
+// 		)
+// 	}
+// 	_, writerErr = fieldWriter.Write(fieldData)
+// 	if writerErr != nil {
+// 		return nil, errors.Join(
+// 			writerErr,
+// 			errors.New("error writing data to file"),
+// 		)
+// 	}
 
-	contentWriter, writerErr := multipartWriter.CreateFormFile(
-		req.BinaryPartName,
-		req.FileName,
-	)
-	if writerErr != nil {
-		return nil, errors.Join(
-			writerErr,
-			errors.New("error creating form file writer"),
-		)
-	}
-	_, writerErr = contentWriter.Write(req.BinaryData)
-	if writerErr != nil {
-		return nil, errors.Join(
-			writerErr,
-			errors.New("error writing data to file"),
-		)
-	}
+// 	contentWriter, writerErr := multipartWriter.CreateFormFile(
+// 		req.BinaryPartName,
+// 		req.FileName,
+// 	)
+// 	if writerErr != nil {
+// 		return nil, errors.Join(
+// 			writerErr,
+// 			errors.New("error creating form file writer"),
+// 		)
+// 	}
+// 	_, writerErr = contentWriter.Write(req.BinaryData)
+// 	if writerErr != nil {
+// 		return nil, errors.Join(
+// 			writerErr,
+// 			errors.New("error writing data to file"),
+// 		)
+// 	}
 
-	multipartWriter.Close()
-	return requestBody.Bytes(), nil
-}
+// 	multipartWriter.Close()
+// 	return requestBody.Bytes(), nil
+// }
 
-func BlobUpdate(
-	sfdcClient client.Client,
-	request BlobUpdateRequest,
-) error {
-	httpResponse, err := sfdcClient.Send(
-		request,
-	)
-	if err != nil {
-		return err
-	}
-	defer httpResponse.Body.Close()
-	if httpResponse.StatusCode >= 200 && httpResponse.StatusCode < 300 {
-		return nil
-	}
-	var errorResponse []Req.ApiError
-	decodeError := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
-	if decodeError != nil {
-		return decodeError
-	}
-	if len(errorResponse) > 0 {
-		return errorResponse[0]
-	}
-	return ErrUnknown
-}
+// func BlobUpdate(
+// 	sfdcClient client.Client,
+// 	request BlobUpdateRequest,
+// ) error {
+// 	httpResponse, err := sfdcClient.Send(
+// 		request,
+// 	)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer httpResponse.Body.Close()
+// 	if httpResponse.StatusCode >= 200 && httpResponse.StatusCode < 300 {
+// 		return nil
+// 	}
+// 	var errorResponse []Req.ApiError
+// 	decodeError := json.NewDecoder(httpResponse.Body).Decode(&errorResponse)
+// 	if decodeError != nil {
+// 		return decodeError
+// 	}
+// 	if len(errorResponse) > 0 {
+// 		return errorResponse[0]
+// 	}
+// 	return ErrUnknown
+// }
