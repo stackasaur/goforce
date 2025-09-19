@@ -70,7 +70,9 @@ func TestCompositeFunctions(t *testing.T) {
 			}
 			deleteSubrequest, err := composite.SubRequest(
 				deleteSObjectRequest,
-				nil,
+				&composite.SubRequestOptions{
+					ReferenceId: "refAccount2",
+				},
 			)
 			if err != nil {
 				t.Fatal(err)
