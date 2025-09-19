@@ -63,6 +63,8 @@ func SubRequest(
 	if err != nil {
 		return nil, err
 	}
+	delete(headers, "Content-Type")
+
 	method, err := sfdcReq.GetMethod()
 	if err != nil {
 		return nil, err
