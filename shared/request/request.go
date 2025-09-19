@@ -19,16 +19,12 @@ type SfdcRequest interface {
 }
 
 type GenericRequest struct {
-	Version string
 	Headers map[string]string
 	Method  string
 	Path    *url.URL
 	Body    []byte
 }
 
-func (req GenericRequest) GetVersion() (string, error) {
-	return req.Version, nil
-}
 func (req GenericRequest) GetMethod() (string, error) {
 	return req.Method, nil
 }
