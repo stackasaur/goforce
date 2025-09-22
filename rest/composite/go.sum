@@ -10,9 +10,15 @@ github.com/stackasaur/goforce v0.0.12 h1:lS5uurRy0nKTlu8V7UugpHeALZ1xqsfsEzU5sAI
 github.com/stackasaur/goforce v0.0.12/go.mod h1:bWWvo+RhrY/LvnV1aXC+7nZrNPPKzVMWT+QEbbRsFJc=
 github.com/stackasaur/goforce v0.0.13 h1:+UvzhmsVJN1acdKCvuxESCM727y/FvbNT2szwpHb4d4=
 github.com/stackasaur/goforce v0.0.13/go.mod h1:bWWvo+RhrY/LvnV1aXC+7nZrNPPKzVMWT+QEbbRsFJc=
+github.com/stackasaur/goforce v0.1.0 h1:nKJk97D69eNKWCMjIQi50zSqObjBRCz9tD73y4/6cKY=
+github.com/stackasaur/goforce v0.1.0/go.mod h1:bWWvo+RhrY/LvnV1aXC+7nZrNPPKzVMWT+QEbbRsFJc=
 github.com/stackasaur/goforce/auth v0.0.5 h1:P5e6uLqWffhZL2kQAYfb7xDIaXXEAH+okxFuuRYn6Sk=
 github.com/stackasaur/goforce/auth v0.0.5/go.mod h1:79z+j0bNkq15VTMhOw+uwjcukB8tFnhjsaChVAUcP3Y=
 github.com/stackasaur/goforce/auth v0.0.7 h1:GZsynOGp51KcSm7vGBsfXMDgWz7IRTSnHmk26d9OR5E=
 github.com/stackasaur/goforce/auth v0.0.7/go.mod h1:79z+j0bNkq15VTMhOw+uwjcukB8tFnhjsaChVAUcP3Y=
+github.com/stackasaur/goforce/auth v0.1.0 h1:GIMK71PIaS4nzCxTLemsBGoN1s9cfPnHW9ukvQEZxds=
+github.com/stackasaur/goforce/auth v0.1.0/go.mod h1:79z+j0bNkq15VTMhOw+uwjcukB8tFnhjsaChVAUcP3Y=
 github.com/stackasaur/goforce/client v0.0.6 h1:AHv+XSGl7l+OAG+wMem4Q0vaZ2mMrnkP89adZ/3Rczc=
 github.com/stackasaur/goforce/client v0.0.6/go.mod h1:8WOAT0TUmuWS5WWRDIY+Bjec3u7n02/TnhNHAM/nh9I=
+github.com/stackasaur/goforce/client v0.1.1 h1:7hEDrm9kY3T4hE6AvX3MlERkWrvIqVMSQWi+EIpeBlo=
+github.com/stackasaur/goforce/client v0.1.1/go.mod h1:8WOAT0TUmuWS5WWRDIY+Bjec3u7n02/TnhNHAM/nh9I=
