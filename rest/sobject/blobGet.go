@@ -55,8 +55,8 @@ type Blob struct {
 }
 
 func BlobGet(
-	sfdcClient client.Client,
-	request BlobGetRequest,
+	sfdcClient *client.Client,
+	request *BlobGetRequest,
 ) (*Blob, error) {
 	httpResponse, err := sfdcClient.Send(
 		request,

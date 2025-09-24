@@ -50,8 +50,8 @@ func TestSObjectFunctions(t *testing.T) {
 	}
 
 	recordId, err := CreateSObject(
-		*sfdcClient,
-		createSObjectRequest,
+		sfdcClient,
+		&createSObjectRequest,
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -64,8 +64,8 @@ func TestSObjectFunctions(t *testing.T) {
 	}
 
 	acct, err := GetSObject[Account](
-		*sfdcClient,
-		getSObjectRequest,
+		sfdcClient,
+		&getSObjectRequest,
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -88,16 +88,16 @@ func TestSObjectFunctions(t *testing.T) {
 	}
 
 	err = UpdateSObject(
-		*sfdcClient,
-		updateSObjectRequest,
+		sfdcClient,
+		&updateSObjectRequest,
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	acct, err = GetSObject[Account](
-		*sfdcClient,
-		getSObjectRequest,
+		sfdcClient,
+		&getSObjectRequest,
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -116,16 +116,16 @@ func TestSObjectFunctions(t *testing.T) {
 		RecordId:       recordId,
 	}
 	err = DeleteSObject(
-		*sfdcClient,
-		deleteSObjectRequest,
+		sfdcClient,
+		&deleteSObjectRequest,
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	_, err = GetSObject[Account](
-		*sfdcClient,
-		getSObjectRequest,
+		sfdcClient,
+		&getSObjectRequest,
 	)
 	if err == nil {
 		t.Fatal(

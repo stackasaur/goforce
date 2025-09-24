@@ -46,8 +46,8 @@ func TestBlobMethods(t *testing.T) {
 			}
 
 			recordId, err = BlobCreate(
-				*sfdcClient,
-				blobCreateRequest,
+				sfdcClient,
+				&blobCreateRequest,
 			)
 			if err != nil {
 				t.Fatal(err)
@@ -65,8 +65,8 @@ func TestBlobMethods(t *testing.T) {
 			}
 
 			blob, err := BlobGet(
-				*sfdcClient,
-				blobGetRequest,
+				sfdcClient,
+				&blobGetRequest,
 			)
 			if err != nil {
 				t.Fatal(err)
@@ -88,8 +88,8 @@ func TestBlobMethods(t *testing.T) {
 		RecordId:       recordId,
 	}
 	err = DeleteSObject(
-		*sfdcClient,
-		deleteSObjectRequest,
+		sfdcClient,
+		&deleteSObjectRequest,
 	)
 	if err != nil {
 		t.Fatal(err)

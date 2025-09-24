@@ -78,8 +78,8 @@ func (req GetSObjectRequest) GetBody() ([]byte, error) {
 }
 
 func GetSObject[T any](
-	sfdcClient client.Client,
-	request GetSObjectRequest,
+	sfdcClient *client.Client,
+	request *GetSObjectRequest,
 ) (*T, error) {
 	httpResponse, err := sfdcClient.Send(
 		request,

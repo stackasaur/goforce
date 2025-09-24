@@ -70,8 +70,8 @@ func (req DeleteSObjectRequest) GetBody() ([]byte, error) {
 }
 
 func DeleteSObject(
-	sfdcClient client.Client,
-	request DeleteSObjectRequest,
+	sfdcClient *client.Client,
+	request *DeleteSObjectRequest,
 ) error {
 	httpResponse, err := sfdcClient.Send(
 		request,

@@ -73,8 +73,8 @@ func (req UpdateSObjectRequest) GetBody() ([]byte, error) {
 }
 
 func UpdateSObject(
-	sfdcClient client.Client,
-	request UpdateSObjectRequest,
+	sfdcClient *client.Client,
+	request *UpdateSObjectRequest,
 ) error {
 	httpResponse, err := sfdcClient.Send(
 		request,

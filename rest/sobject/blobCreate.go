@@ -124,8 +124,8 @@ func (req BlobCreateRequest) GetBody() ([]byte, error) {
 }
 
 func BlobCreate(
-	sfdcClient client.Client,
-	request BlobCreateRequest,
+	sfdcClient *client.Client,
+	request *BlobCreateRequest,
 ) (string, error) {
 	httpResponse, err := sfdcClient.Send(
 		request,
