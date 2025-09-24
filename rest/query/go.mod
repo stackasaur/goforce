@@ -1,4 +1,4 @@
-module github.com/stackasaur/goforce/query
+module github.com/stackasaur/goforce/rest/query
 
 go 1.24.2
 
