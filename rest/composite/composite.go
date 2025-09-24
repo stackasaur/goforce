@@ -128,8 +128,8 @@ func (req CompositeRequest) GetBody() ([]byte, error) {
 }
 
 func Composite(
-	sfdcClient client.Client,
-	request CompositeRequest,
+	sfdcClient *client.Client,
+	request *CompositeRequest,
 ) (*CompositeResult, error) {
 	httpResponse, err := sfdcClient.Send(
 		request,
