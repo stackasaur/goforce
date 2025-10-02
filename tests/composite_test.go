@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -93,6 +94,19 @@ func TestCompositeFunctions(t *testing.T) {
 			)
 			if err != nil {
 				t.Fatal(err)
+			}
+
+			for _, it := range result.CompositeResponse {
+				t.Log(it.StatusCode)
+				b, err := json.Marshal(it.Body)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// Convert the byte slice to a string
+				jsonString := string(b)
+
+				t.Log(jsonString)
 			}
 
 			t.Log(result)
