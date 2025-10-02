@@ -34,7 +34,7 @@ type CompositeSubrequest struct {
 type CompositeSubrequestResult struct {
 	Body        *json.RawMessage  `json:"body"`
 	HttpHeaders map[string]string `json:"httpHeaders"`
-	StatusCode  int               `json:"statusCode"`
+	StatusCode  int               `json:"httpStatusCode"`
 	ReferenceId string            `json:"referenceId"`
 }
 type CompositeResult struct {
