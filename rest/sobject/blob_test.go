@@ -45,6 +45,13 @@ func TestBlobMethods(t *testing.T) {
 				FileName: "test.txt",
 			}
 
+			body, err := blobCreateRequest.GetBody()
+
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Log(string(body))
+
 			recordId, err = BlobCreate(
 				sfdcClient,
 				&blobCreateRequest,

@@ -77,7 +77,7 @@ func (req BlobCreateRequest) GetBody() ([]byte, error) {
 	h.Set(
 		"Content-Disposition",
 		fmt.Sprintf(
-			`form-data; name="%s"; filename=""`,
+			`form-data; name="%s"`,
 			req.FieldsPartName,
 		),
 	)

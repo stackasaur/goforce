@@ -14,6 +14,10 @@ type Account struct {
 	Id   string
 	Name string
 }
+type Contact struct {
+	Id   string
+	Name string
+}
 
 func TestQueryRequest(t *testing.T) {
 	queryRequest := QueryRequest{
@@ -66,13 +70,15 @@ func TestQuery(t *testing.T) {
 		Query:   "SELECT Id, Name FROM Account LIMIT 1",
 	}
 
-	accounts, err := Query[Account](
+	accountResp, err := Query[Account](
 		sfdcClient,
 		&queryRequest,
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	accounts := accountResp.Records
 
 	if len(accounts) != 1 {
 		t.Fatalf(
@@ -112,5 +118,67 @@ func TestQuery(t *testing.T) {
 			err,
 		)
 	}
+
+}
+
+func TestQueryMore(t *testing.T) {
+	clientId := os.Getenv("CLIENT_ID")
+	clientSecret := os.Getenv("CLIENT_SECRET")
+	tokenEndpoint := os.Getenv("TOKEN_ENDPOINT")
+
+	authFlow := auth.ClientCredentialsFlow{
+		ClientId:      clientId,
+		ClientSecret:  clientSecret,
+		TokenEndpoint: tokenEndpoint,
+	}
+
+	sfdcClient, err := client.NewClient(
+		client.ClientConfig{
+			Version:  60,
+			AuthFlow: authFlow,
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	queryRequest := QueryRequest{
+		Version: "60.0",
+		Query:   "SELECT Id, Name FROM Contact",
+		QueryOptions: QueryOptions{
+			BatchSize: 200,
+		},
+	}
+
+	contactResp, err := Query[Contact](
+		sfdcClient,
+		&queryRequest,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf(
+		"totalSize: %d, records: %d",
+		contactResp.TotalSize,
+		len(contactResp.Records),
+	)
+	if contactResp.Done {
+		t.Fatal("shouldn't be done, check the linked org.")
+	}
+
+	contactNextResp, err := contactResp.QueryMore(
+		sfdcClient,
+		QueryOptions{},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf(
+		"totalSize: %d, records: %d",
+		contactNextResp.TotalSize,
+		len(contactNextResp.Records),
+	)
 
 }

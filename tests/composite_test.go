@@ -89,8 +89,8 @@ func TestCompositeFunctions(t *testing.T) {
 			}
 
 			result, err := composite.Composite(
-				*sfdcClient,
-				compositeRequest,
+				sfdcClient,
+				&compositeRequest,
 			)
 			if err != nil {
 				t.Fatal(err)
