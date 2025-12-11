@@ -12,7 +12,7 @@ func TestBlobMethods(t *testing.T) {
 	clientId := os.Getenv("CLIENT_ID")
 	clientSecret := os.Getenv("CLIENT_SECRET")
 	tokenEndpoint := os.Getenv("TOKEN_ENDPOINT")
-	recordId := os.Getenv("ACCOUNT_ID")
+	accountId := os.Getenv("ACCOUNT_ID")
 
 	authFlow := auth.ClientCredentialsFlow{
 		ClientId:      clientId,
@@ -30,6 +30,7 @@ func TestBlobMethods(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	var recordId string
 	t.Run(
 		"Create Blob",
 		func(t *testing.T) {
@@ -39,7 +40,7 @@ func TestBlobMethods(t *testing.T) {
 				BinaryData:     []byte("testing"),
 				FieldsPartName: "entity_attachment",
 				Fields: map[string]any{
-					"ParentId": recordId,
+					"ParentId": accountId,
 					"Name":     "test.txt",
 				},
 				FileName: "test.txt",
@@ -55,6 +56,36 @@ func TestBlobMethods(t *testing.T) {
 			recordId, err = BlobCreate(
 				sfdcClient,
 				&blobCreateRequest,
+			)
+			if err != nil {
+				t.Fatal(err)
+			}
+		},
+	)
+
+	t.Run(
+		"Update Blob",
+		func(t *testing.T) {
+			blobUpdateRequest := BlobUpdateRequest{
+				SObjectApiName: "Attachment",
+				BinaryPartName: "Body",
+				BinaryData:     []byte("testing2"),
+				FieldsPartName: "entity_attachment",
+				RecordId:       recordId,
+				Fields:         map[string]any{},
+				FileName:       "test.txt",
+			}
+
+			body, err := blobUpdateRequest.GetBody()
+
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Log(string(body))
+
+			err = BlobUpdate(
+				sfdcClient,
+				&blobUpdateRequest,
 			)
 			if err != nil {
 				t.Fatal(err)
@@ -81,24 +112,26 @@ func TestBlobMethods(t *testing.T) {
 
 			body := string(blob.Data)
 
-			if body != "testing" {
+			if body != "testing2" {
 				t.Fatalf(
-					"expected file data: 'testing', received: '%s'",
+					"expected file data: 'testing2', received: '%s'",
 					body,
 				)
 			}
 		},
 	)
 
-	deleteSObjectRequest := DeleteSObjectRequest{
-		SObjectApiName: "Attachment",
-		RecordId:       recordId,
-	}
-	err = DeleteSObject(
-		sfdcClient,
-		&deleteSObjectRequest,
-	)
-	if err != nil {
-		t.Fatal(err)
+	if len(recordId) > 0 {
+		deleteSObjectRequest := DeleteSObjectRequest{
+			SObjectApiName: "Attachment",
+			RecordId:       recordId,
+		}
+		err = DeleteSObject(
+			sfdcClient,
+			&deleteSObjectRequest,
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }
